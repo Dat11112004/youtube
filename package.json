@@ -1,0 +1,25 @@
+{
+  "name": "youtube-ad-shield-pro",
+  "version": "2.1.0",
+  "description": "Chrome Extension chuyên dụng cho YouTube: Tự động phát hiện và xử lý quảng cáo khi xem video",
+  "private": true,
+  "scripts": {
+    "test": "node tests/run_tests.js",
+    "type-check": "tsc --noEmit",
+    "validate": "node scripts/validate.js",
+    "build": "node scripts/validate.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/chrome": "^0.0.268"
+  },
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "youtube",
+    "ad-skipper",
+    "production-ready"
+  ],
+  "author": "Senior Chrome Extension Engineer",
+  "license": "MIT"
+}

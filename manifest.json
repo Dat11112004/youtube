@@ -1,0 +1,87 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Ad-Shield Pro",
+  "version": "2.1.0",
+  "description": "Tự động ngăn chặn quảng cáo YouTube ở tầng dữ liệu Pre-Stream ngay khi mở video, bảo vệ video chính và trải nghiệm xem mượt mà.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "YouTube Ad-Shield Pro",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/service_worker.js"
+  },
+  "permissions": [
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://*.youtube.com/*",
+    "https://youtube.com/*"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "adshield_dnr_rules",
+        "enabled": true,
+        "path": "rules/dnr_rules.json"
+      }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.youtube.com/*",
+        "https://youtube.com/*"
+      ],
+      "js": [
+        "src/content/inject.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://*.youtube.com/*",
+        "https://youtube.com/*"
+      ],
+      "css": [
+        "src/content/content.css"
+      ],
+      "js": [
+        "src/utils/logger.js",
+        "src/utils/dom.js",
+        "src/utils/storage.js",
+        "src/content/detection/rules.js",
+        "src/content/detection/ad_detector.js",
+        "src/content/processing/ad_processor.js",
+        "src/content/navigation/navigation_watcher.js",
+        "src/content/content_main.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/content/inject.js",
+        "icons/icon16.png",
+        "icons/icon48.png",
+        "icons/icon128.png"
+      ],
+      "matches": [
+        "https://*.youtube.com/*",
+        "https://youtube.com/*"
+      ]
+    }
+  ]
+}

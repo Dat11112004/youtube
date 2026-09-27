@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Ad-Shield Pro</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-wrapper">
+          <img src="../../icons/icon48.png" alt="Logo" class="logo-img">
+          <div class="logo-glow"></div>
+        </div>
+        <div class="title-group">
+          <h1 class="app-title">Ad-Shield Pro</h1>
+          <span class="version-tag">v2.1</span>
+        </div>
+      </div>
+      <button id="btn-close-popup" class="btn-icon-action" title="Đóng bảng điều khiển (Esc)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Website & Protection Context Card -->
+    <section id="yt-context-card" class="context-card context-yt-active">
+      <div class="context-row">
+        <span class="context-label">Website:</span>
+        <span id="site-name" class="site-badge">YouTube</span>
+      </div>
+      <div class="context-row">
+        <span class="context-label">Trạng thái xử lý:</span>
+        <span id="processing-status" class="processing-badge">Đang sẵn sàng tự động xử lý</span>
+      </div>
+    </section>
+
+    <!-- Master Switch Card (Active / Inactive) -->
+    <section class="master-card">
+      <div class="master-info">
+        <div class="status-indicator">
+          <span id="status-dot" class="dot dot-active"></span>
+          <span id="status-text" class="status-label">Active</span>
+        </div>
+        <p class="status-subtext">Tự động tua 16x & bỏ qua quảng cáo</p>
+      </div>
+      <label class="switch switch-lg" title="Bật/Tắt extension">
+        <input type="checkbox" id="toggle-master" checked>
+        <span class="slider"></span>
+      </label>
+    </section>
+
+    <!-- Metrics Grid: Số lượng xử lý trong phiên hiện tại -->
+    <section class="metrics-grid">
+      <!-- Session Metric (Mục tiêu chính) -->
+      <div class="metric-card metric-primary">
+        <div class="metric-header">
+          <span class="metric-badge">Phiên hiện tại</span>
+          <span class="metric-emoji">⚡</span>
+        </div>
+        <div id="stat-session-count" class="metric-value">0</div>
+        <div class="metric-label">Đã xử lý trong phiên</div>
+      </div>
+
+      <!-- Total Metric -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-badge-secondary">Tổng cộng</span>
+          <span class="metric-emoji">🛡️</span>
+        </div>
+        <div id="stat-total-count" class="metric-value">0</div>
+        <div class="metric-label">Tổng số đã xử lý</div>
+      </div>
+
+      <!-- Time Saved Metric -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-badge-secondary">Tiết kiệm</span>
+          <span class="metric-emoji">⏱️</span>
+        </div>
+        <div id="stat-time" class="metric-value">0s</div>
+        <div class="metric-label">Thời gian xem tiết kiệm</div>
+      </div>
+    </section>
+
+    <!-- Thao tác nhanh: Kích hoạt & Đóng ngay -->
+    <div class="quick-action-container">
+      <button id="btn-quick-activate" class="btn-quick-action" title="Bật và đóng ngay bảng điều khiển">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-text">Kích hoạt & Đóng ngay</span>
+      </button>
+    </div>
+
+    <!-- Tùy chỉnh nâng cao (Settings Drawer) -->
+    <div class="settings-drawer-toggle">
+      <button id="btn-toggle-settings" class="btn-settings-expand">
+        <span class="settings-btn-left">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Tùy chỉnh chi tiết</span>
+        </span>
+        <span id="settings-arrow" class="arrow-icon">▼</span>
+      </button>
+
+      <div id="settings-panel" class="settings-panel collapsed">
+        <div class="feature-item">
+          <div class="feature-text">
+            <div class="feature-title">🚀 Turbo-Skip Video Ads</div>
+            <div class="feature-desc">Tua 16x & bấm Skip tự động trong 50ms</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-video-ads" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-text">
+            <div class="feature-title">🛡️ Khắc chế Anti-Adblock</div>
+            <div class="feature-desc">Xóa bỏ popup cảnh báo vi phạm của YouTube</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-anti-adblock" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-text">
+            <div class="feature-title">🖥️ Chống che màn hình</div>
+            <div class="feature-desc">Dọn sạch màn mờ/backdrop đen che video</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-backdrops" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-text">
+            <div class="feature-title">🖼️ Ẩn Banner & Feed Ads</div>
+            <div class="feature-desc">Xóa các khung tài trợ trên trang chủ & gợi ý</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-banners" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-text">
+            <div class="feature-title">📱 Chặn quảng cáo Shorts</div>
+            <div class="feature-desc">Tự động lướt qua video Shorts được tài trợ</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-shorts" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer với nút Reset -->
+    <footer class="footer">
+      <div class="footer-actions">
+        <button id="btn-reset-session" class="btn-text-secondary" title="Đặt lại số quảng cáo đã xử lý trong phiên về 0">
+          Đặt lại phiên (Reset)
+        </button>
+        <span class="footer-divider">•</span>
+        <button id="btn-reset-all" class="btn-text-secondary" title="Xóa toàn bộ thống kê">
+          Đặt lại tất cả
+        </button>
+      </div>
+      <span class="hint-text">Esc để đóng</span>
+    </footer>
+  </div>
+
+  <script src="../utils/storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

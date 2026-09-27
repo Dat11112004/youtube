@@ -1,0 +1,90 @@
+/**
+ * YouTube Ad-Shield Pro - Declarative CSS
+ * Ẩn sạch 100% các banner, slot quảng cáo, companion ads, overlay che video và popup cảnh báo vi phạm
+ * Được đồng bộ hoàn toàn với AdShieldRules
+ */
+
+/* 1. Master CSS Guard: Hoạt động mặc định trừ khi người dùng tắt qua Popup */
+html:not(.yt-adshield-disabled) #masthead-ad,
+html:not(.yt-adshield-disabled) ytd-ad-slot-renderer,
+html:not(.yt-adshield-disabled) .ytd-ad-slot-renderer,
+html:not(.yt-adshield-disabled) ytd-in-feed-ad-layout-renderer,
+html:not(.yt-adshield-disabled) ytd-banner-promo-renderer,
+html:not(.yt-adshield-disabled) ytd-statement-banner-renderer,
+html:not(.yt-adshield-disabled) ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+html:not(.yt-adshield-disabled) ytd-rich-item-renderer:has(.ytd-in-feed-ad-layout-renderer),
+html:not(.yt-adshield-disabled) ytd-rich-section-renderer:has(ytd-ad-slot-renderer),
+html:not(.yt-adshield-disabled) ytd-rich-section-renderer:has(.ytd-in-feed-ad-layout-renderer),
+html:not(.yt-adshield-disabled) ytd-promoted-video-renderer,
+html:not(.yt-adshield-disabled) ytd-compact-promoted-video-renderer,
+html:not(.yt-adshield-disabled) ytd-promoted-sparkles-web-renderer,
+html:not(.yt-adshield-disabled) ytd-search-pyv-renderer,
+html:not(.yt-adshield-disabled) ytd-player-legacy-desktop-watch-ads-renderer,
+html:not(.yt-adshield-disabled) #player-ads,
+html:not(.yt-adshield-disabled) #panels ytd-ads-engagement-panel-content-view-model,
+html:not(.yt-adshield-disabled) ytd-action-companion-ad-renderer,
+html:not(.yt-adshield-disabled) ytd-companion-slot-renderer,
+html:not(.yt-adshield-disabled) .ytd-companion-slot-renderer,
+html:not(.yt-adshield-disabled) #companion,
+html:not(.yt-adshield-disabled) #secondary ytd-companion-slot-renderer,
+html:not(.yt-adshield-disabled) #secondary ytd-ad-slot-renderer,
+html:not(.yt-adshield-disabled) #below ytd-ad-slot-renderer,
+html:not(.yt-adshield-disabled) #below ytd-companion-slot-renderer,
+html:not(.yt-adshield-disabled) ytd-watch-flexy ytd-ad-slot-renderer,
+html:not(.yt-adshield-disabled) ytd-watch-flexy ytd-companion-slot-renderer,
+html:not(.yt-adshield-disabled) ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
+html:not(.yt-adshield-disabled) ytd-merch-shelf-renderer {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 2. Loại bỏ các Overlay quảng cáo che khung hình Video */
+html:not(.yt-adshield-disabled) .ytp-ad-overlay-container,
+html:not(.yt-adshield-disabled) .ytp-ad-overlay-slot,
+html:not(.yt-adshield-disabled) .ytp-ad-image-overlay,
+html:not(.yt-adshield-disabled) .ytp-ad-text-overlay,
+html:not(.yt-adshield-disabled) .ytp-ad-message-container,
+html:not(.yt-adshield-disabled) .ytp-ad-persistent-progress-bar-container,
+html:not(.yt-adshield-disabled) .ytp-ad-survey,
+html:not(.yt-adshield-disabled) .ytp-suggested-action {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 3. Chặn quảng cáo Shorts (Ẩn hoàn toàn khung Shorts được tài trợ) */
+html:not(.yt-adshield-disabled) ytd-reel-video-renderer:has(ytd-ad-slot-renderer),
+html:not(.yt-adshield-disabled) ytd-reel-video-renderer:has(.ytd-ad-slot-renderer),
+html:not(.yt-adshield-disabled) ytd-reel-video-renderer:has(.ytd-in-feed-ad-layout-renderer) {
+  display: none !important;
+}
+
+/* 4. Khắc chế Anti-Adblock & Dọn sạch màn mờ che màn hình */
+html:not(.yt-adshield-disabled) tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
+html:not(.yt-adshield-disabled) ytd-enforcement-message-view-model,
+html:not(.yt-adshield-disabled) ytd-popup-container:has(ytd-enforcement-message-view-model),
+html:not(.yt-adshield-disabled) yt-playability-error-supported-renderers:has(ytd-enforcement-message-view-model) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Gỡ bỏ backdrop đen làm tối mờ màn hình video khi YouTube tung popup */
+html:not(.yt-adshield-disabled) tp-yt-iron-overlay-backdrop {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Trả lại quyền cuộn trang và xem video khi YouTube cố tình khóa màn hình */
+html.yt-adshield-unlocked,
+html.yt-adshield-unlocked body {
+  overflow: auto !important;
+  overflow-y: auto !important;
+}
