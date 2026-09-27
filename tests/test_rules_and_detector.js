@@ -129,7 +129,7 @@ function runRulesAndDetectorTests() {
   // Test 6: Verify that Next Video button is NEVER picked up as a skip button
   const nextBtn = createMockElement('button', { className: 'ytp-next-button', textContent: 'Next video' });
   domElements.push(nextBtn);
-  assert.strictEqual(detector.isValidSkipButton(nextBtn), false, 'Next button must NEVER be valid skip button');
+  assert.strictEqual(detector._isValidSkipButton(nextBtn), false, 'Next button must NEVER be valid skip button');
 
   console.log('✅ rules.js and ad_detector.js passed all unit tests.');
 }

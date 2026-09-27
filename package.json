@@ -7,7 +7,7 @@
     "test": "node tests/run_tests.js",
     "type-check": "tsc --noEmit",
     "validate": "node scripts/validate.js",
-    "build": "node scripts/validate.js"
+    "build": "node scripts/validate.js && tsc --noEmit && node tests/run_tests.js"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

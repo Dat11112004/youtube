@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const siteName = document.getElementById('site-name');
   const processingStatus = document.getElementById('processing-status');
 
-  const toggleMaster = document.getElementById('toggle-master');
+  const toggleMaster = /** @type {HTMLInputElement} */ (document.getElementById('toggle-master'));
   const statusDot = document.getElementById('status-dot');
   const statusText = document.getElementById('status-text');
   const masterCard = document.querySelector('.master-card');
@@ -23,11 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statTotalCount = document.getElementById('stat-total-count');
   const statTime = document.getElementById('stat-time');
 
-  const toggleVideoAds = document.getElementById('toggle-video-ads');
-  const toggleAntiAdblock = document.getElementById('toggle-anti-adblock');
-  const toggleBackdrops = document.getElementById('toggle-backdrops');
-  const toggleBanners = document.getElementById('toggle-banners');
-  const toggleShorts = document.getElementById('toggle-shorts');
+  const toggleVideoAds = /** @type {HTMLInputElement} */ (document.getElementById('toggle-video-ads'));
+  const toggleAntiAdblock = /** @type {HTMLInputElement} */ (document.getElementById('toggle-anti-adblock'));
+  const toggleBackdrops = /** @type {HTMLInputElement} */ (document.getElementById('toggle-backdrops'));
+  const toggleBanners = /** @type {HTMLInputElement} */ (document.getElementById('toggle-banners'));
+  const toggleShorts = /** @type {HTMLInputElement} */ (document.getElementById('toggle-shorts'));
 
   const btnResetSession = document.getElementById('btn-reset-session');
   const btnResetAll = document.getElementById('btn-reset-all');

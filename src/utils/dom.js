@@ -37,8 +37,8 @@ const AdShieldDOM = (function () {
             })
           );
         }
-        if (typeof el.click === 'function') {
-          el.click();
+        if (typeof /** @type {HTMLElement} */ (el).click === 'function') {
+          /** @type {HTMLElement} */ (el).click();
         }
       } catch (err) {
         if (typeof AdShieldLogger !== 'undefined') {

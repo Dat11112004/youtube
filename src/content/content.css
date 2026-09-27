@@ -1,10 +1,17 @@
 /**
  * YouTube Ad-Shield Pro - Declarative CSS
- * Ẩn sạch 100% các banner, slot quảng cáo, companion ads, overlay che video và popup cảnh báo vi phạm
- * Được đồng bộ hoàn toàn với AdShieldRules
+ * Ẩn sạch 100% các banner, slot quảng cáo, companion ads, overlay che video và popup cảnh báo
+ *
+ * NGUYÊN TẮC QUAN TRỌNG:
+ * - KHÔNG BAO GIỜ ẩn nút Skip Ad (.ytp-skip-ad-button, .ytp-ad-skip-button-*)
+ * - KHÔNG BAO GIỜ ẩn .video-ads container (chứa nút skip bên trong)
+ * - KHÔNG BAO GIỜ ẩn .ytp-ad-module (chứa cả skip button và ad info)
+ * - Chỉ ẩn các visual overlay/banner/companion ads
  */
 
-/* 1. Master CSS Guard: Hoạt động mặc định trừ khi người dùng tắt qua Popup */
+/* ==========================================================
+   1. Banner, Feed, Companion, Promoted Ads (ẩn hoàn toàn)
+   ========================================================== */
 html:not(.yt-adshield-disabled) #masthead-ad,
 html:not(.yt-adshield-disabled) ytd-ad-slot-renderer,
 html:not(.yt-adshield-disabled) .ytd-ad-slot-renderer,
@@ -44,7 +51,10 @@ html:not(.yt-adshield-disabled) ytd-merch-shelf-renderer {
   padding: 0 !important;
 }
 
-/* 2. Loại bỏ các Overlay quảng cáo che khung hình Video */
+/* ==========================================================
+   2. Video Overlay Ads (ẩn visual overlay, GIỮA LẠI skip button)
+   KHÔNG bao gồm .ytp-ad-module hoặc .video-ads vì chứa skip button
+   ========================================================== */
 html:not(.yt-adshield-disabled) .ytp-ad-overlay-container,
 html:not(.yt-adshield-disabled) .ytp-ad-overlay-slot,
 html:not(.yt-adshield-disabled) .ytp-ad-image-overlay,
@@ -52,20 +62,56 @@ html:not(.yt-adshield-disabled) .ytp-ad-text-overlay,
 html:not(.yt-adshield-disabled) .ytp-ad-message-container,
 html:not(.yt-adshield-disabled) .ytp-ad-persistent-progress-bar-container,
 html:not(.yt-adshield-disabled) .ytp-ad-survey,
-html:not(.yt-adshield-disabled) .ytp-suggested-action {
+html:not(.yt-adshield-disabled) .ytp-suggested-action,
+html:not(.yt-adshield-disabled) .ytp-ad-action-interstitial-background-container,
+html:not(.yt-adshield-disabled) .ytp-ad-player-overlay-flyout-cta,
+html:not(.yt-adshield-disabled) .ytp-ad-badge,
+html:not(.yt-adshield-disabled) .ytp-ad-hover-text-container,
+html:not(.yt-adshield-disabled) .ytp-ad-info-dialog-container,
+html:not(.yt-adshield-disabled) .ytp-ad-player-overlay-instream-info,
+html:not(.yt-adshield-disabled) .ytp-ad-button-icon {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-/* 3. Chặn quảng cáo Shorts (Ẩn hoàn toàn khung Shorts được tài trợ) */
+/* ==========================================================
+   3. BẢO VỆ Skip Button - Đảm bảo luôn hiển thị và click được
+   Ưu tiên cao nhất để override mọi rule ẩn khác (chỉ khi có ad)
+   ========================================================== */
+html:not(.yt-adshield-disabled) .video-ads .ytp-skip-ad-button,
+html:not(.yt-adshield-disabled) .video-ads .ytp-ad-skip-button,
+html:not(.yt-adshield-disabled) .video-ads .ytp-ad-skip-button-modern,
+html:not(.yt-adshield-disabled) .video-ads .ytp-ad-skip-button-container,
+html:not(.yt-adshield-disabled) .video-ads .ytp-ad-skip-button-slot,
+html:not(.yt-adshield-disabled) .video-ads button[id^="skip-button"],
+html:not(.yt-adshield-disabled) .video-ads [class*="ytp-ad-skip-button"],
+html:not(.yt-adshield-disabled) .ad-showing .ytp-skip-ad-button,
+html:not(.yt-adshield-disabled) .ad-showing .ytp-ad-skip-button,
+html:not(.yt-adshield-disabled) .ad-showing .ytp-ad-skip-button-modern,
+html:not(.yt-adshield-disabled) .ad-showing .ytp-ad-skip-button-container,
+html:not(.yt-adshield-disabled) .ad-showing .ytp-ad-skip-button-slot,
+html:not(.yt-adshield-disabled) .ad-showing button[id^="skip-button"],
+html:not(.yt-adshield-disabled) .ad-showing [class*="ytp-ad-skip-button"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 999999 !important;
+}
+
+/* ==========================================================
+   4. Shorts Ads (ẩn hoàn toàn khung Shorts được tài trợ)
+   ========================================================== */
 html:not(.yt-adshield-disabled) ytd-reel-video-renderer:has(ytd-ad-slot-renderer),
 html:not(.yt-adshield-disabled) ytd-reel-video-renderer:has(.ytd-ad-slot-renderer),
 html:not(.yt-adshield-disabled) ytd-reel-video-renderer:has(.ytd-in-feed-ad-layout-renderer) {
   display: none !important;
 }
 
-/* 4. Khắc chế Anti-Adblock & Dọn sạch màn mờ che màn hình */
+/* ==========================================================
+   5. Anti-Adblock Dialogs & Backdrops
+   ========================================================== */
 html:not(.yt-adshield-disabled) tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
 html:not(.yt-adshield-disabled) ytd-enforcement-message-view-model,
 html:not(.yt-adshield-disabled) ytd-popup-container:has(ytd-enforcement-message-view-model),
@@ -75,14 +121,15 @@ html:not(.yt-adshield-disabled) yt-playability-error-supported-renderers:has(ytd
   pointer-events: none !important;
 }
 
-/* Gỡ bỏ backdrop đen làm tối mờ màn hình video khi YouTube tung popup */
 html:not(.yt-adshield-disabled) tp-yt-iron-overlay-backdrop {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-/* Trả lại quyền cuộn trang và xem video khi YouTube cố tình khóa màn hình */
+/* ==========================================================
+   6. Unlock scroll khi YouTube khóa trang
+   ========================================================== */
 html.yt-adshield-unlocked,
 html.yt-adshield-unlocked body {
   overflow: auto !important;

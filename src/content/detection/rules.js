@@ -20,13 +20,22 @@ const AdShieldRules = {
     '.ytp-skip-ad-button',
     '.ytp-ad-skip-button',
     '.ytp-ad-skip-button-modern',
-    'button.ytp-ad-skip-button-text'
+    'button.ytp-ad-skip-button-text',
+    '.ytp-ad-skip-button-container button',
+    '.ytp-ad-skip-button-slot button',
+    'button[id^="skip-button"]',
+    '[class*="ytp-ad-skip-button"]',
+    '[id*="skip-button"]',
+    '.ytp-ad-button.ytp-ad-button-link'
   ],
 
   skipKeywords: [
     'skip',
     'bỏ qua',
-    'passer'
+    'passer',
+    'sauter',
+    'saltar',
+    'überspringen'
   ],
 
   // 3. Banner, Feed và Promotional Ads trên trang YouTube (Ẩn bằng Declarative CSS)
@@ -70,7 +79,18 @@ const AdShieldRules = {
     '.ytp-ad-text-overlay',
     '.ytp-ad-message-container',
     '.ytp-ad-survey',
-    '.ytp-suggested-action'
+    '.ytp-suggested-action',
+    '.ytp-ad-player-overlay-layout',
+    '.ytp-ad-action-interstitial',
+    '.ytp-ad-action-interstitial-slot',
+    '.ytp-ad-action-interstitial-background-container',
+    '.ytp-ad-player-overlay-flyout-cta',
+    '.ytp-ad-badge',
+    '.ytp-ad-hover-text-container',
+    '.ytp-ad-info-dialog-container',
+    '.ytp-ad-button-icon',
+    '.ytp-ad-player-overlay-instream-info',
+    '.ytp-ad-persistent-progress-bar-container'
   ],
 
   // 3. Cảnh báo Anti-Adblock của YouTube
