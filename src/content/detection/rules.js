@@ -23,6 +23,12 @@ const AdShieldRules = {
     'button.ytp-ad-skip-button-text'
   ],
 
+  skipKeywords: [
+    'skip',
+    'bỏ qua',
+    'passer'
+  ],
+
   // 3. Banner, Feed và Promotional Ads trên trang YouTube (Ẩn bằng Declarative CSS)
   bannerAds: [
     '#masthead-ad',

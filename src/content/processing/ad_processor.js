@@ -29,8 +29,8 @@ class AdProcessor {
    */
   handleAdPrevented(source = 'network_pre_stream') {
     if (typeof AdShieldLogger !== 'undefined') {
-      AdShieldLogger.log('Advertisement prevented', `(Pre-stream metadata filtered from: ${source})`);
-      AdShieldLogger.log('Main video preserved', '(Main video plays directly at original speed, volume, and timeline)');
+      AdShieldLogger.log('Advertisement prevented');
+      AdShieldLogger.log('Main video preserved');
     }
 
     const now = Date.now();

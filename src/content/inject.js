@@ -23,12 +23,17 @@
     'adPlacementConfig'
   ];
 
+  console.log('[YT-ADBLOCK] Extension initialized (Pre-stream Interceptor)');
+
   /**
    * Thông báo tới Isolated World để ghi nhận thống kê và xuất log
    * @param {string} source
    */
   function notifyAdPrevented(source) {
     try {
+      console.log('[YT-ADBLOCK] Advertisement detected');
+      console.log('[YT-ADBLOCK] Advertisement prevented');
+      console.log('[YT-ADBLOCK] Main video preserved');
       window.dispatchEvent(
         new CustomEvent('yt-adshield-prevented', {
           detail: { source, timestamp: Date.now() }

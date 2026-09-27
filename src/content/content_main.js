@@ -1,9 +1,16 @@
 /**
  * YouTube Ad-Shield Pro - Content Script Orchestrator
  * Quản lý chu trình và State Machine bảo vệ Main Video:
- * IDLE -> MAIN_VIDEO_PLAYING -> ADVERTISEMENT_DETECTED -> ADVERTISEMENT_HANDLED -> MAIN_VIDEO_PLAYING
+ * IDLE -> MAIN_VIDEO_PLAYING -> ADVERTISEMENT_PREVENTED -> MAIN_VIDEO_PLAYING
  *
- * TUYỆT ĐỐI KHÔNG CÓ FLOW SANG NEXT VIDEO
+ * TUYỆT ĐỐI TUÂN THỦ CÁC QUY TẮC BẢO VỆ VIDEO CHÍNH:
+ * - KHÔNG tua video, KHÔNG đổi video.currentTime
+ * - KHÔNG đổi video.playbackRate
+ * - KHÔNG click nút Skip Ads, KHÔNG click nút Next
+ * - KHÔNG pause/play video
+ * - KHÔNG reload trang
+ * - Xử lý quảng cáo trước khi hiển thị (Pre-Stream Prevention)
+ * - FAIL-SAFE: Nếu không xác định chắc chắn advertisement thì DO NOTHING
  */
 
 (function () {
@@ -12,17 +19,23 @@
   if (window.__yt_adshield_orchestrator__) return;
   window.__yt_adshield_orchestrator__ = true;
 
-  // 1. Định nghĩa State Machine
+  // 1. Logging khởi động
+  if (typeof AdShieldLogger !== 'undefined') {
+    AdShieldLogger.log('Extension initialized');
+  }
+
+  // 2. Định nghĩa State Machine
   const PlayerState = {
     IDLE: 'IDLE',
     MAIN_VIDEO_PLAYING: 'MAIN_VIDEO_PLAYING',
     ADVERTISEMENT_DETECTED: 'ADVERTISEMENT_DETECTED',
-    ADVERTISEMENT_HANDLED: 'ADVERTISEMENT_HANDLED'
+    ADVERTISEMENT_PREVENTED: 'ADVERTISEMENT_PREVENTED'
   };
 
   let currentState = PlayerState.IDLE;
+  let hasLoggedMainVideo = false;
 
-  // 2. Khởi tạo các module chuyên trách
+  // 3. Khởi tạo các module chuyên trách
   const rules = typeof AdShieldRules !== 'undefined' ? AdShieldRules : {};
   const detector = new AdDetector(rules);
 
@@ -39,7 +52,7 @@
 
   const navigation = new NavigationWatcher();
 
-  // 3. Trạng thái cấu hình runtime
+  // 4. Trạng thái cấu hình runtime
   let settings = {
     masterEnabled: true,
     skipVideoAds: true,
@@ -52,7 +65,6 @@
   let activeVideoElement = null;
   let activePlayerElement = null;
   let domObserver = null;
-  let playerClassObserver = null;
 
   // Throttle scan bằng requestAnimationFrame
   let isScanScheduled = false;
@@ -65,7 +77,21 @@
     });
   }
 
-  // 4. Chu kỳ kiểm tra và State Machine Transition
+  // 5. Lắng nghe sự kiện từ Main World (inject.js) khi quảng cáo bị chặn trước khi phát
+  window.addEventListener('yt-adshield-prevented', (event) => {
+    if (!settings.masterEnabled) return;
+
+    currentState = PlayerState.ADVERTISEMENT_PREVENTED;
+
+    if (typeof AdShieldLogger !== 'undefined') {
+      AdShieldLogger.log('Advertisement detected');
+    }
+
+    processor.handleAdPrevented(event.detail?.source || 'pre_stream');
+    scheduleScan();
+  });
+
+  // 6. Chu kỳ kiểm tra định kỳ (DOM & Anti-adblock)
   function executeScanCycle() {
     if (!settings.masterEnabled) return;
 
@@ -73,102 +99,64 @@
 
     const { player, video } = detector.getPlayerAndVideo();
 
-    // Xử lý Video Ads theo State Machine nghiêm ngặt
-    if (settings.skipVideoAds && video && player) {
+    // Xác nhận và bảo vệ Main Video
+    if (video && player) {
       const isAdActive = detector.isVideoAdActive(player);
 
       if (isAdActive) {
-        // TÌNH HUỐNG 1: Phát hiện quảng cáo
+        // TÌNH HUỐNG: YouTube cố render UI quảng cáo
         if (currentState !== PlayerState.ADVERTISEMENT_DETECTED) {
           currentState = PlayerState.ADVERTISEMENT_DETECTED;
-        }
-        const skipBtn = detector.findSkipButton();
-        processor.handleAdStart(video, player, skipBtn);
-      } else {
-        // TÌNH HUỐNG 2: Video bình thường (Không có quảng cáo)
-        if (currentState === PlayerState.ADVERTISEMENT_DETECTED) {
-          // Chuyển từ AD sang MAIN VIDEO
-          currentState = PlayerState.ADVERTISEMENT_HANDLED;
-          processor.handleAdEnd(video);
-          currentState = PlayerState.MAIN_VIDEO_PLAYING;
-        } else if (currentState === PlayerState.IDLE) {
-          // Lần đầu mở video và video không có quảng cáo
-          currentState = PlayerState.MAIN_VIDEO_PLAYING;
           if (typeof AdShieldLogger !== 'undefined') {
-            AdShieldLogger.log('Main video detected', `(Video ID: ${navigation.currentVideoId || 'watch'})`);
-            AdShieldLogger.log('Main video preserved', '(No ad detected, playing normally without interference)');
+            AdShieldLogger.log('Advertisement detected');
           }
         }
-        // Khi ở MAIN_VIDEO_PLAYING: TUYỆT ĐỐI KHÔNG TÁC ĐỘNG VÀO VIDEO PLAYER!
+        // NGUYÊN TẮC FAIL-SAFE & BẢO VỆ TUYỆT ĐỐI:
+        // TUYỆT ĐỐI KHÔNG tua currentTime, KHÔNG đổi playbackRate, KHÔNG click Next/Skip!
+        // Quảng cáo đã/đang được chặn ở tầng Pre-Stream & Declarative CSS
+      } else {
+        // TÌNH HUỐNG: Main Video đang phát bình thường
+        if (!hasLoggedMainVideo) {
+          hasLoggedMainVideo = true;
+          currentState = PlayerState.MAIN_VIDEO_PLAYING;
+          if (typeof AdShieldLogger !== 'undefined') {
+            AdShieldLogger.log('Main video detected');
+            AdShieldLogger.log('Main video preserved');
+          }
+        } else if (currentState === PlayerState.ADVERTISEMENT_DETECTED || currentState === PlayerState.ADVERTISEMENT_PREVENTED) {
+          currentState = PlayerState.MAIN_VIDEO_PLAYING;
+          if (typeof AdShieldLogger !== 'undefined') {
+            AdShieldLogger.log('Main video preserved');
+          }
+        }
       }
     }
 
-    // Xử lý Anti-Adblock modal
+    // Xử lý Anti-Adblock modal (Chỉ gỡ modal/backdrop, KHÔNG can thiệp video)
     if (settings.antiAdblock) {
       const dialogs = detector.findAntiAdblockDialogs();
       const backdrops = settings.removeBackdrops ? detector.findBackdrops() : [];
       if (dialogs.length > 0 || backdrops.length > 0) {
-        processor.neutralizeAntiAdblock(dialogs, backdrops, video);
-      }
-    }
-
-    // Xử lý Shorts Ads (Chỉ chạy trên URL /shorts/)
-    if (settings.blockShorts && window.location.pathname.startsWith('/shorts/')) {
-      const shortData = detector.detectSponsoredShort();
-      if (shortData) {
-        processor.skipSponsoredShort(shortData);
+        processor.neutralizeAntiAdblock(dialogs, backdrops);
       }
     }
   }
 
-  // 5. Gắn kết trực tiếp thẻ Player và Video để bắt mid-roll ads ngay lập tức
-  function onVideoTimeUpdate() {
-    if (!settings.masterEnabled || !settings.skipVideoAds) return;
-    const { player, video } = detector.getPlayerAndVideo();
-    if (!player || !video) return;
-
-    const isAdActive = detector.isVideoAdActive(player);
-
-    if (isAdActive) {
-      if (currentState !== PlayerState.ADVERTISEMENT_DETECTED) {
-        currentState = PlayerState.ADVERTISEMENT_DETECTED;
-      }
-      const skipBtn = detector.findSkipButton();
-      processor.handleAdStart(video, player, skipBtn);
-    } else if (currentState === PlayerState.ADVERTISEMENT_DETECTED) {
-      currentState = PlayerState.ADVERTISEMENT_HANDLED;
-      processor.handleAdEnd(video);
-      currentState = PlayerState.MAIN_VIDEO_PLAYING;
-    }
-  }
-
+  // 7. Gắn kết thẻ Player và Video
   function bindElements() {
     const { player, video } = detector.getPlayerAndVideo();
 
     if (player && player !== activePlayerElement) {
       activePlayerElement = player;
-
-      if (playerClassObserver) {
-        playerClassObserver.disconnect();
-      }
-      // Chỉ quan sát sự thay đổi class trên player để bắt ad-showing
-      playerClassObserver = new MutationObserver(() => scheduleScan());
-      playerClassObserver.observe(player, {
-        attributes: true,
-        attributeFilter: ['class']
-      });
     }
 
     if (video && video !== activeVideoElement) {
-      if (activeVideoElement) {
-        activeVideoElement.removeEventListener('timeupdate', onVideoTimeUpdate);
-      }
       activeVideoElement = video;
-      activeVideoElement.addEventListener('timeupdate', onVideoTimeUpdate);
+      hasLoggedMainVideo = false;
     }
   }
 
-  // 6. Cập nhật DOM Class tương ứng với trạng thái Master
+  // 8. Cập nhật DOM Class tương ứng với trạng thái Master
   function updateDomClasses(isEnabled) {
     const root = document.documentElement;
     if (!isEnabled) {
@@ -180,7 +168,7 @@
     }
   }
 
-  // 7. Tải và lắng nghe cài đặt từ chrome.storage
+  // 9. Tải và lắng nghe cài đặt từ chrome.storage
   if (typeof getSettings === 'function') {
     getSettings().then((stored) => {
       settings = { ...settings, ...stored };
@@ -205,28 +193,21 @@
         if ('masterEnabled' in changes) {
           const isEnabled = changes.masterEnabled.newValue !== false;
           updateDomClasses(isEnabled);
-          if (!isEnabled) {
-            processor.handleAdEnd(activeVideoElement);
-          }
         }
         scheduleScan();
       }
     });
   }
 
-  // 8. Kết nối Navigation Watcher
+  // 10. Kết nối Navigation Watcher (Hỗ trợ YouTube SPA)
   navigation.onNavigate(({ url, videoId, isNewVideo }) => {
     if (typeof AdShieldLogger !== 'undefined') {
-      AdShieldLogger.log('YouTube navigation detected', `(URL: ${url})`);
+      AdShieldLogger.log('Navigation detected');
     }
 
-    // Nếu trước đó đang trong trạng thái xử lý ad, khôi phục ngay
-    if (currentState === PlayerState.ADVERTISEMENT_DETECTED) {
-      processor.handleAdEnd(activeVideoElement);
-    }
-
-    // Reset về IDLE cho video mới
+    // Reset về IDLE cho video mới - Đảm bảo xử lý độc lập từng video
     currentState = PlayerState.IDLE;
+    hasLoggedMainVideo = false;
     processor.resetState();
 
     if (isNewVideo) {
@@ -238,7 +219,7 @@
     scheduleScan();
   });
 
-  // 9. Khởi tạo Observer quan sát DOM có giới hạn (Chỉ thẻ #content)
+  // 11. Khởi tạo Observer quan sát DOM
   function startObserver() {
     if (domObserver) domObserver.disconnect();
 
@@ -254,7 +235,7 @@
     });
   }
 
-  // 10. Khởi động
+  // 12. Khởi động
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       bindElements();
@@ -267,7 +248,7 @@
     scheduleScan();
   }
 
-  // 11. Phản hồi thông tin tới Popup
+  // 13. Phản hồi thông tin tới Popup
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.action === 'GET_TAB_STATUS') {
